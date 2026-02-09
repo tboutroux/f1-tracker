@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey, Float, DateTime
-from base import Base
+from models.base import Base
 
 
 class Pitstop(Base):

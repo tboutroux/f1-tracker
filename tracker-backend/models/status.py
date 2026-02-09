@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean
-from base import Base
+from models.base import Base
 
 
 class Status(Base):

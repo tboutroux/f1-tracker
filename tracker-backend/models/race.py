@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey
-from base import Base
+from models.base import Base
 
 
 class Race(Base):

@@ -22,6 +22,9 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
+import sys
+sys.path.append(os.getcwd())
+
 from models.base import Base 
 target_metadata = Base.metadata
 
@@ -62,8 +65,15 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
+    # Récupère l'URL du .env
+    url = os.getenv("DATABASE_URL")
+    
+    # Écrase la config du .ini avec celle du .env
+    configuration = config.get_section(config.config_ini_section)
+    configuration["sqlalchemy.url"] = url
+    
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
