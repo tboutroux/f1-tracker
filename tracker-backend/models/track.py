@@ -25,6 +25,5 @@ class Track(Base):
     turns_number = Column(Integer, nullable=False)
     best_lap = Column(Float, nullable=False)
     best_lap_driver = Column(Integer, nullable=False)
-    timezone = Column(String(50))
     geojson_data = Column(JSON, nullable=False)
     corners = Column(JSON, nullable=False)
