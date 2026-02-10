@@ -50,6 +50,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+test.py
 
 # Translations
 *.mo
@@ -217,3 +218,6 @@ __marimo__/
 
 # Alembic
 alembic.ini
+
+# FastF1
+fastf1_cache/

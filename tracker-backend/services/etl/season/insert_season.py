@@ -6,13 +6,34 @@ from dotenv import load_dotenv
 import os
 
 
-def fetch_and_seed_seasons():
+# Initialize session management
+def get_session():
     load_dotenv()
     engine = create_engine(os.getenv("DATABASE_URL"))
     Session = sessionmaker(bind=engine)
-    session = Session()
+    return Session()
 
+
+def insert_season(session, year):
+    try:
+        exists = session.query(Season).filter_by(year=year).first()
+        
+        if not exists:
+            new_season = Season(year=year)
+            session.add(new_season)
+            session.commit()
+            print(f"✅ Saison {year} insérée en base de données.")
+        else:
+            print(f"⚠️ Saison {year} existe déjà en base de données. Ignorée.")
+
+    except Exception as e:
+        session.rollback()
+        print(f"❌ Erreur lors de l'insertion de la saison {year} : {e}")
+
+
+def fetch_and_seed_seasons():
     print("📅 Récupération des saisons via Ergast API...")
+    session = get_session()
     
     try:
         offset = 0
@@ -36,14 +57,8 @@ def fetch_and_seed_seasons():
         
         for season_info in all_seasons:
             year = int(season_info['season'])
-            
-            exists = session.query(Season).filter_by(year=year).first()
-            
-            if not exists:
-                new_season = Season(year=year)
-                session.add(new_season)
+            insert_season(session, year)
 
-        session.commit()
         print("🏁 Toutes les saisons ont été synchronisées en base de données !")
 
     except requests.exceptions.RequestException as e:
@@ -53,7 +68,6 @@ def fetch_and_seed_seasons():
         print(f"❌ Erreur lors de l'insertion : {e}")
     finally:
         session.close()
-
 
 if __name__ == "__main__":
     fetch_and_seed_seasons()
