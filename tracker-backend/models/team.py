@@ -24,4 +24,3 @@ class Team(Base):
     is_engine_constructor = Column(Boolean, nullable=False)
     engine_constructor = Column(String(100), nullable=True)
     main_color = Column(String(7))
-    drivers = relationship("Driver", back_populates="team")

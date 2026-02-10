@@ -3,7 +3,10 @@ import requests
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models.country import Country # Ton modèle SQLAlchemy
+from models.country import Country
+
+
+load_dotenv() 
 
 
 def insert_country(session, name, iso_code, flag_url=None, timezone=None, alt_spellings=None, female_demonym=None, male_demonym=None):
@@ -24,7 +27,6 @@ def insert_country(session, name, iso_code, flag_url=None, timezone=None, alt_sp
 
 
 def fetch_and_seed_countries():
-    # 1. Configuration de la connexion
     engine = create_engine(os.getenv("DATABASE_URL"))
     Session = sessionmaker(bind=engine)
     session = Session()

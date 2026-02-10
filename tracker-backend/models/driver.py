@@ -19,11 +19,8 @@ class Driver(Base):
     """
     __tablename__ = 'driver'
     id = Column(Integer, primary_key=True)
-    team_id = Column(Integer, ForeignKey('team.id'), nullable=False)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     birth_date = Column(Date)
     birth_country = Column(Integer, ForeignKey('country.id'))
-    grid_number = Column(Integer, nullable=False)
     code_name = Column(String(3))
-    team = relationship("Team", back_populates="drivers")

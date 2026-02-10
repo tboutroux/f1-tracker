@@ -1,4 +1,5 @@
 import requests
+import fastf1
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models.driver import Driver
@@ -32,14 +33,16 @@ def get_driver_team_id(session, team_name):
 
 
 def load_drivers(session):
-    print("🚗 Récupération des pilotes via Ergast API...")
     
     try:
         offset = 0
         all_drivers = []
         
         while True:
-            time.sleep(1) # Be polite to the API and avoid hitting rate limits
+            print(f"📡 Récupération des pilotes avec offset {offset}...")
+
+            time.sleep(3) # Be polite to the API and avoid hitting rate limits
+            
             url = f"https://api.jolpi.ca/ergast/f1/drivers?format=json&offset={offset}"
             response = requests.get(url)
             response.raise_for_status()
@@ -49,42 +52,36 @@ def load_drivers(session):
             
             if not drivers_data:
                 break
-            
+                
             all_drivers.extend(drivers_data)
             offset += 30
         
         print(f"✅ {len(all_drivers)} pilotes récupérés. Début de l'insertion...")
         
         for driver_info in all_drivers:
-            driver_code = driver_info.get('code')
+            code_name = driver_info.get('code')
             number = driver_info.get('permanentNumber')
-            given_name = driver_info['givenName']
-            family_name = driver_info['familyName']
-            date_of_birth = driver_info['dateOfBirth']
+            first_name = driver_info['givenName']
+            last_name = driver_info['familyName']
+            date_of_birth = driver_info['dateOfBirth'] if driver_info.get('dateOfBirth') else None
 
-            nationality = driver_info['nationality']
+            nationality = driver_info['nationality'] if driver_info.get('nationality') else None
             
             # Retrieve the country ID from the database
             country_id = get_country_id(session, nationality)
 
-            # Retrieve the team ID from the database using FastF1 matching logic (if available)
-            team_name = driver_info.get('team')
-            team_id = get_driver_team_id(session, team_name) if team_name else None
-
-            existing_driver = session.query(Driver).filter_by(driver_code=driver_code).first()
+            existing_driver = session.query(Driver).filter_by(first_name=first_name, last_name=last_name, code_name=code_name).first()
 
             if existing_driver:
-                print(f"⚠️ Pilote {given_name} {family_name} ({driver_code}) existe déjà en base de données. Ignoré.")
+                print(f"⚠️ Pilote {first_name} {last_name} ({code_name}) existe déjà en base de données. Ignoré.")
                 continue
 
             new_driver = Driver(
-                given_name=given_name,
-                family_name=family_name,
-                date_of_birth=date_of_birth,
+                first_name=first_name,
+                last_name=last_name,
+                birth_date=date_of_birth,
                 birth_country=country_id,
-                team_id=team_id,
-                driver_code=driver_code,
-                number=number,
+                code_name=code_name,
             )
             session.add(new_driver)
         session.commit()
